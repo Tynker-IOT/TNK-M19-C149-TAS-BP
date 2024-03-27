@@ -1,0 +1,611 @@
+[
+    {
+        "id": "f69831cd765dbed5",
+        "type": "ui_gauge",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "group": "3125ee5a8ea0abc1",
+        "order": 0,
+        "width": "5",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Humidity",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "0",
+        "max": "100",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 280,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "3eda274394aaea18",
+        "type": "mqtt in",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "topic": "humValue",
+        "qos": "0",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 80,
+        "y": 120,
+        "wires": [
+            [
+                "f69831cd765dbed5",
+                "19a4c8aec8a82471"
+            ]
+        ]
+    },
+    {
+        "id": "81979ac6780d9a28",
+        "type": "mqtt in",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "topic": "tempValue",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 80,
+        "y": 180,
+        "wires": [
+            [
+                "19a4c8aec8a82471",
+                "061b728debcbb806"
+            ]
+        ]
+    },
+    {
+        "id": "15bd7060fb840492",
+        "type": "function",
+        "z": "762318a4d07bb99c",
+        "name": "AddToArray",
+        "func": "var tableData = flow.get(\"savedData\") || []\n\nmsg.payload[\"timeStamp\"] = new Date().toLocaleString()\n\nif(tableData.length>0 )\n{   \n   tableData.unshift( msg.payload)\n}\nelse if(tableData.length==0){\n   tableData.unshift( msg.payload)\n}\n\nmsg.payload = tableData\n\nflow.set(\"savedData\", tableData)\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nflow.set(\"savedData\", [])",
+        "finalize": "",
+        "libs": [],
+        "x": 450,
+        "y": 200,
+        "wires": [
+            [
+                "d9cfd13e971e5917",
+                "45a212ad1e603239"
+            ]
+        ]
+    },
+    {
+        "id": "19a4c8aec8a82471",
+        "type": "join",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "mode": "custom",
+        "build": "object",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "accumulate": false,
+        "timeout": "15",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 250,
+        "y": 240,
+        "wires": [
+            [
+                "15bd7060fb840492",
+                "983cf1c497ba0d0e"
+            ]
+        ]
+    },
+    {
+        "id": "45a212ad1e603239",
+        "type": "ui_table",
+        "z": "762318a4d07bb99c",
+        "group": "d7add96eb24337e9",
+        "name": "Data Table",
+        "order": 1,
+        "width": "20",
+        "height": "5",
+        "columns": [
+            {
+                "field": "time",
+                "title": "Time Stamp",
+                "width": "30%",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "tempValue",
+                "title": "Temperature",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "phValue",
+                "title": "PH",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "tdsValue",
+                "title": "TDS",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            },
+            {
+                "field": "humValue",
+                "title": "Humidity",
+                "width": "",
+                "align": "center",
+                "formatter": "plaintext",
+                "formatterParams": {
+                    "target": "_blank"
+                }
+            }
+        ],
+        "outputs": 0,
+        "cts": false,
+        "x": 570,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "d9cfd13e971e5917",
+        "type": "function",
+        "z": "762318a4d07bb99c",
+        "name": "SetUpFirebaseData",
+        "func": "var data = []\ndata[\"humValue\"] = msg.payload[0][\"humValue\"]\ndata[\"phValue\"] = msg.payload[0][\"phValue\"]\ndata[\"tempValue\"] = msg.payload[0][\"tempValue\"]\ndata[\"tdsValue\"] = msg.payload[0][\"tdsValue\"]\ndata[\"time\"]=msg.payload[0][\"timeStamp\"]\n\nmsg.payload = data\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 180,
+        "wires": [
+            [
+                "de58d420164ec1ad"
+            ]
+        ]
+    },
+    {
+        "id": "60ed4515128a39bb",
+        "type": "telegram client sender",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "bot": "38453e9c236cb604",
+        "x": 780,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1a9a48eeba883901",
+        "type": "mqtt in",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "topic": "phValue",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 70,
+        "y": 240,
+        "wires": [
+            [
+                "19a4c8aec8a82471",
+                "040c07c2074591d0"
+            ]
+        ]
+    },
+    {
+        "id": "edefe3509e5adc06",
+        "type": "mqtt in",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "topic": "tdsValue",
+        "qos": "2",
+        "datatype": "auto-detect",
+        "broker": "ac6659385df72324",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 80,
+        "y": 300,
+        "wires": [
+            [
+                "19a4c8aec8a82471",
+                "c1cf17ebb831220a"
+            ]
+        ]
+    },
+    {
+        "id": "061b728debcbb806",
+        "type": "ui_gauge",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "group": "3125ee5a8ea0abc1",
+        "order": 1,
+        "width": "5",
+        "height": "3",
+        "gtype": "gage",
+        "title": "Temperature",
+        "label": "units",
+        "format": "{{value}}",
+        "min": "-40",
+        "max": "80",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 290,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "040c07c2074591d0",
+        "type": "ui_gauge",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "group": "3125ee5a8ea0abc1",
+        "order": 2,
+        "width": "5",
+        "height": "3",
+        "gtype": "gage",
+        "title": "PH",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "14",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 270,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "c1cf17ebb831220a",
+        "type": "ui_gauge",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "group": "3125ee5a8ea0abc1",
+        "order": 3,
+        "width": "5",
+        "height": "3",
+        "gtype": "gage",
+        "title": "TDS",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "1000",
+        "colors": [
+            "#00b500",
+            "#e6e600",
+            "#ca3838"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 270,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "983cf1c497ba0d0e",
+        "type": "function",
+        "z": "762318a4d07bb99c",
+        "name": "CheckForThreshold",
+        "func": "var thresholds = {humValue: { low: 12, high: 25 },\n                  tempValue: { low: 20, high: 30 },\n                  phValue: { low: 5.5, high: 7 },\n                  tdsValue: { low: 600, high: 1600 },\n                  }\nvar currentData = msg.payload\n\nvar status = \"\"\nfor (let key in thresholds) {\n  if (currentData[key] < thresholds[key].low || thresholds[key].high < currentData[key]) {\n    status = `${status} ${key} reading is ${currentData[key]}. (range ${thresholds[key].low}-${thresholds[key].high}) \\n`\n  }\n}\n\nstatus =status +\"\\n /controls\" \nif(status!=\"\")\n{\n  msg.payload = {\n      \"api\": \"messages\",\n      \"func\": \"SendMessage\",\n      \"args\": {\n          \"peer\": \"shubham80621\",\n          \"message\": status\n      }\n  }\n}\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 240,
+        "wires": [
+            [
+                "60ed4515128a39bb"
+            ]
+        ]
+    },
+    {
+        "id": "fe148953faa55fbe",
+        "type": "telegram client receiver",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "bot": "38453e9c236cb604",
+        "sendrawevents": false,
+        "sendnewmessage": true,
+        "sendeditedmessage": false,
+        "senddeletedmessage": false,
+        "sendalbum": false,
+        "sendcallbackquery": false,
+        "x": 150,
+        "y": 360,
+        "wires": [
+            [
+                "5c1b16daad8c8664"
+            ]
+        ]
+    },
+    {
+        "id": "52755bdac8df8bc0",
+        "type": "function",
+        "z": "762318a4d07bb99c",
+        "name": "Create Tele Commands ",
+        "func": "var msg = msg\n \nmsg.payload = {\n  \"api\": \"messages\",\n  \"func\": \"SendMessage\",\n  \"args\": {\n    \"peer\": \"shubham80621\",\n    \"message\": \"Choose an option: \\n /startIrrigation \\n /stopIrrigation\"\n  }\n};\n\nreturn [msg];\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 550,
+        "y": 300,
+        "wires": [
+            [
+                "60ed4515128a39bb"
+            ]
+        ]
+    },
+    {
+        "id": "9b1ba127eef87a8f",
+        "type": "mqtt out",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "topic": "/irrigate",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "ac6659385df72324",
+        "x": 730,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "0acad72d3796a3ef",
+        "type": "function",
+        "z": "762318a4d07bb99c",
+        "name": "HandleIrrigation",
+        "func": "var msg = msg\nif (msg.payload.message.message == \"/startIrrigation\"){\n   msg.payload = \"100\" \n   return msg;\n}\nelse if (msg.payload.message.message == \"/stopIrrigation\"){\n   msg.payload = \"0\" \n   return msg;\n}\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 510,
+        "y": 360,
+        "wires": [
+            [
+                "9b1ba127eef87a8f"
+            ]
+        ]
+    },
+    {
+        "id": "5c1b16daad8c8664",
+        "type": "switch",
+        "z": "762318a4d07bb99c",
+        "name": "",
+        "property": "payload.message.message",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "/controls",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "/controls",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 330,
+        "y": 360,
+        "wires": [
+            [
+                "52755bdac8df8bc0"
+            ],
+            [
+                "0acad72d3796a3ef"
+            ]
+        ]
+    },
+    {
+        "id": "de58d420164ec1ad",
+        "type": "firebase modify",
+        "z": "762318a4d07bb99c",
+        "name": "Set Firebase Data",
+        "firebaseconfig": "",
+        "childpath": "tableData",
+        "method": "push",
+        "value": "msg.payload",
+        "priority": "msg.priority",
+        "x": 730,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6c25d761894c2a38",
+        "type": "firebase.on",
+        "z": "762318a4d07bb99c",
+        "name": "Get Firebase Data",
+        "firebaseconfig": "",
+        "childpath": "tableData",
+        "atStart": true,
+        "eventType": "value",
+        "queries": [],
+        "x": 130,
+        "y": 440,
+        "wires": [
+            [
+                "aad2e2034560249c"
+            ]
+        ]
+    },
+    {
+        "id": "aad2e2034560249c",
+        "type": "debug",
+        "z": "762318a4d07bb99c",
+        "name": "debug 7",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 350,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "3125ee5a8ea0abc1",
+        "type": "ui_group",
+        "name": "Guages",
+        "tab": "d3fb97e7a614c68d",
+        "order": 1,
+        "disp": true,
+        "width": "20",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "ac6659385df72324",
+        "type": "mqtt-broker",
+        "name": "C140",
+        "broker": "broker.emqx.io",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "d7add96eb24337e9",
+        "type": "ui_group",
+        "name": "Data Table",
+        "tab": "d3fb97e7a614c68d",
+        "order": 2,
+        "disp": true,
+        "width": "20",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "38453e9c236cb604",
+        "type": "telegram client config",
+        "botname": "Noderedexpbot",
+        "verboselogging": false,
+        "loginmode": "bot",
+        "useproxy": false,
+        "usewss": false,
+        "host": "",
+        "sockstype": "5",
+        "port": "6667",
+        "username": "anonymous",
+        "password": "",
+        "secret": "",
+        "mtproxy": false,
+        "timeout": "2",
+        "info": "6499039108:AAGX8TObSomH6Frhw_bh3wr4kc_XrW6crPI\r\n"
+    },
+    {
+        "id": "d3fb97e7a614c68d",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
